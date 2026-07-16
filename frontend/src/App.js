@@ -2,48 +2,135 @@ import React, { useState } from 'react';
 import './App.css';
 
 function App() {
-  const [playstyle, setPlaystyle] = useState('');
-  const [recommendation, setRecommendation] = useState('');
+  // pulling the saved name from local storage so it survives page refreshes! if it's empty, default to unknown.
+  const [character, setCharacter] = useState(() => {
+    const savedName = localStorage.getItem('playerName');
+    return {
+      name: savedName || "Unknown Adventurer",
+      level: 1,
+      hp: 100,
+      mana: 50,
+      stats: { strength: 14, intelligence: 18, dexterity: 12 }
+    };
+  });
 
-  const getRecommendation = async () => {
-    try {
-      
-      const response = await fetch(`http://localhost:8000/api/recommend?playstyle=${playstyle}`);
-      const data = await response.json();
-      setRecommendation(data.recommendation);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      setRecommendation("Backend server not running!");
-    }
+  // state for the name input box
+  const [inputName, setInputName] = useState('');
+
+  const saveName = () => {
+    // updates the UI right now
+    setCharacter({ ...character, name: inputName });
+    // saves it to the browser memory so it doesn't get wiped on refresh
+    localStorage.setItem('playerName', inputName);
+    setInputName(''); // clears the box after signing
+  };
+
+  // the class roller state. user types in what they like, we spit out a classic D&D class.
+  const [playstyle, setPlaystyle] = useState('');
+  const [recommendation, setRecommendation] = useState('Novice Adventurer');
+
+  const rollClass = () => {
+    // checking basic keywords to assign a normal class name.
+    const input = playstyle.toLowerCase();
+    
+    if (input.includes('logic') || input.includes('chaos') || input.includes('smart') || input.includes('magic') || input.includes('wizard') || input.includes('mage') || input.includes('sorcerer') || input.includes('spell')) {
+      setRecommendation('Wizard');
+    } else if (input.includes('smash') || input.includes('strong') || input.includes('front') || input.includes('tank') || input.includes('melee') || input.includes('warrior')) {
+      setRecommendation('Barbarian');
+    } else if (input.includes('sneak') || input.includes('stealth') || input.includes('rogue') || input.includes('rouge') || input.includes('thief') || input.includes('assassin')) {
+      setRecommendation('Rogue');
+    } else if (input.includes('shoot') || input.includes('bow') || input.includes('range') || input.includes('archer') || input.includes('ranged')) {
+      setRecommendation('Ranger');
+    } else if (input.includes('heal') || input.includes('support') || input.includes('cleric') || input.includes('priest') || input.includes('paladin')) {
+      setRecommendation('Cleric');
+    } else if (input.includes('summon') || input.includes('beast') || input.includes('animal') || input.includes('druid')) {
+      setRecommendation('Druid');
+    } else if (input.includes('fighter') || input.includes('combat') || input.includes('martial') || input.includes('duelist')) {
+      setRecommendation('Fighter');
+    } else if (input.includes('monk') || input.includes('ki') || input.includes('martial arts') || input.includes('meditation')) {
+      setRecommendation('Monk');
+    } else if (input.includes('warlock') || input.includes('pact') || input.includes('dark magic') || input.includes('cursed')) {
+      setRecommendation('Warlock');
+    } else if (input.includes('paladin') || input.includes('holy') || input.includes('divine') || input.includes('oath')) {
+      setRecommendation('Paladin');
+    } else if (input.includes('bard') || input.includes('music') || input.includes('song') || input.includes('performance')) {
+      setRecommendation('Bard');
+    } else if (input.includes('sorcerer') || input.includes('innate magic') || input.includes('bloodline') || input.includes('wild magic')) {
+      setRecommendation('Sorcerer');
+    } else if (input.includes('artificer') || input.includes('invention') || input.includes('gadgetry') || input.includes('mechanical')) {
+      setRecommendation('Artificer');
+    } else if (input.includes('echo') || input.includes('time') || input.includes('duplicate') || input.includes('shadow')) {
+      setRecommendation('Echo Knight');
+    } else { 
+      // default recommendation if no keywords match
+      setRecommendation('Novice Adventurer');
+    } // <-- THIS WAS THE MISSING BRACKET
   };
 
   return (
     <div className="App">
-      <header className="App-header" style={{ backgroundColor: '#282c34', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-        <h1>Forge Folio: R&D Prototype</h1>
-        <p>Describe your playstyle to get a class recommendation:</p>
+      <h1>Forge & Folio</h1>
+      
+      <div className="dashboard"> 
         
-        <input 
-          type="text" 
-          value={playstyle} 
-          onChange={(e) => setPlaystyle(e.target.value)} 
-          placeholder=' "I like to smash things..."'
-          style={{ padding: '10px', width: '300px', fontSize: '16px', borderRadius: '5px', border: 'none' }}
-        />
-        
-        <button 
-          onClick={getRecommendation}
-          style={{ marginTop: '20px', padding: '10px 20px', fontSize: '16px', cursor: 'pointer', backgroundColor: '#61dafb', border: 'none', borderRadius: '5px', fontWeight: 'bold' }}
-        >
-          Analyze Playstyle
-        </button>
-
-        {recommendation && (
-          <div style={{ marginTop: '30px', padding: '20px', border: '2px solid #61dafb', borderRadius: '10px' }}>
-            <h2>Recommended Class: <span style={{ color: '#61dafb' }}>{recommendation}</span></h2>
+        {/* left side: my actual character sheet */}
+        <div className="left-column">
+          <h2>Character Sheet</h2>
+          <h3>{character.name}</h3>
+          <h4 style={{ color: '#a0a0a0', fontStyle: 'italic' }}>
+            Level {character.level} {recommendation}
+          </h4>
+          
+          <div style={{ margin: '25px 0', fontSize: '1.2rem' }}>
+            <div style={{ color: '#ff4d4d', fontWeight: 'bold', marginBottom: '10px' }}>HP: {character.hp} / 100</div>
+            <div style={{ color: '#4da6ff', fontWeight: 'bold' }}>Mana: {character.mana} / 50</div>
           </div>
-        )}
-      </header>
+
+          <div className="stats-container">
+            <div className="stat-block"><span>Strength:</span> <span>{character.stats.strength}</span></div>
+            <div className="stat-block"><span>Intelligence:</span> <span>{character.stats.intelligence}</span></div>
+            <div className="stat-block"><span>Dexterity:</span> <span>{character.stats.dexterity}</span></div>
+          </div>
+        </div>
+
+        {/* right side: the tavern. getting user input and rolling classes */}
+        <div className="right-column">
+          <h2>The Tavern</h2>
+          
+          {/* Character Creation / Name Save */}
+          <p>Sign the ledger to begin your journey:</p>
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginBottom: '20px' }}>
+            <input 
+              className="input-field"
+              style={{ marginBottom: '0', width: '50%' }}
+              type="text" 
+              value={inputName} 
+              onChange={(e) => setInputName(e.target.value)} 
+              placeholder="Enter your name..."
+            />
+            <button className="btn-action" onClick={saveName}>
+              Sign
+            </button>
+          </div>
+
+          <hr style={{ borderColor: '#444', borderStyle: 'dashed', margin: '20px 0' }} />
+
+          {/* Class Roller */}
+          <p>Describe your dev playstyle to roll your class:</p>
+          <input 
+            className="input-field"
+            type="text" 
+            value={playstyle} 
+            onChange={(e) => setPlaystyle(e.target.value)} 
+            placeholder='e.g. "I like to smash things..."'
+          />
+          <br />
+          <button className="btn-action" onClick={rollClass}>
+            Roll Your Class
+          </button>
+        </div>
+
+      </div>
     </div>
   );
 }
