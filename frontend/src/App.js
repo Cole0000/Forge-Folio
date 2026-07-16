@@ -64,7 +64,17 @@ function App() {
     } else { 
       // default recommendation if no keywords match
       setRecommendation('Novice Adventurer');
-    } // <-- THIS WAS THE MISSING BRACKET
+    } 
+  };
+
+  const [quests, setQuests] = useState([]);
+  const [newQuest, setNewQuest] = useState('');
+  
+  const addQuest = () => {
+    if (newQuest.trim() !== '') {
+      setQuests([...quests, newQuest]);
+      setNewQuest('');
+    }
   };
 
   return (
@@ -128,6 +138,34 @@ function App() {
           <button className="btn-action" onClick={rollClass}>
             Roll Your Class
           </button>
+          
+          <hr style={{ borderColor: '#444', borderStyle: 'dashed', margin: '20px 0' }} />
+
+          {/* The Quest Log (To-Do List) */}
+          <h2>Active Quests</h2>
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginBottom: '20px' }}>
+            <input 
+              className="input-field"
+              style={{ marginBottom: '0', width: '50%' }}
+              type="text" 
+              value={newQuest} 
+              onChange={(e) => setNewQuest(e.target.value)} 
+              placeholder="Add a new task..."
+            />
+            <button className="btn-action" onClick={addQuest}>
+              Accept Quest
+            </button>
+          </div>
+
+          {/* Mapping out the array of quests into a bullet list */}
+          <ul style={{ listStyleType: 'none', padding: 0, textAlign: 'left', width: '80%', margin: '0 auto' }}>
+            {quests.map((quest, index) => (
+              <li key={index} style={{ background: '#1f1b18', margin: '10px 0', padding: '15px', border: '1px solid #555', borderRadius: '4px', fontSize: '1.2rem' }}>
+                ⚔️ {quest}
+              </li>
+            ))}
+          </ul>
+          
         </div>
 
       </div>
