@@ -75,6 +75,10 @@ function App() {
       setQuests([...quests, newQuest]);
       setNewQuest('');
     }
+  };  
+
+  const completeQuest = (indexToRemove) => {
+    setQuests(quests.filter((_, index) => index !== indexToRemove));
   };
 
   return (
@@ -126,13 +130,13 @@ function App() {
           <hr style={{ borderColor: '#444', borderStyle: 'dashed', margin: '20px 0' }} />
 
           {/* Class Roller */}
-          <p>Describe your dev playstyle to roll your class:</p>
+          <p>Describe your desired playstyle to roll your class:</p>
           <input 
             className="input-field"
             type="text" 
             value={playstyle} 
             onChange={(e) => setPlaystyle(e.target.value)} 
-            placeholder='e.g. "I like to smash things..."'
+            placeholder=' e.g."I like to smash things..."'
           />
           <br />
           <button className="btn-action" onClick={rollClass}>
@@ -160,8 +164,14 @@ function App() {
           {/* Mapping out the array of quests into a bullet list */}
           <ul style={{ listStyleType: 'none', padding: 0, textAlign: 'left', width: '80%', margin: '0 auto' }}>
             {quests.map((quest, index) => (
-              <li key={index} style={{ background: '#1f1b18', margin: '10px 0', padding: '15px', border: '1px solid #555', borderRadius: '4px', fontSize: '1.2rem' }}>
-                ⚔️ {quest}
+              <li key={index} style={{ background: '#1f1b18', margin: '10px 0', padding: '15px', border: '1px solid #555', borderRadius: '4px', fontSize: '1.2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>⚔️ {quest}</span>
+                <button 
+                  onClick={() => completeQuest(index)} 
+                  style={{ background: '#8b0000', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '3px', cursor: 'pointer' }}
+                >
+                  Clear
+                </button>
               </li>
             ))}
           </ul>
