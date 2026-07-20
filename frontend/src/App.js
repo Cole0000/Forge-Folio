@@ -96,26 +96,40 @@ function App() {
           </h4>
           
           {/* Editable HP and Spell Slots */}
-          <div style={{ margin: '25px 0', display: 'flex', justifyContent: 'space-around', fontSize: '1.2rem' }}>
+          <div style={{ margin: '25px 0', display: 'flex', flexDirection: 'column',gap: '15px', fontSize: '1.2rem' }}>
             <div>
               <span style={{ color: '#ff4d4d', fontWeight: 'bold' }}>HP: </span>
-              <input 
+            <input 
                 type="number" 
+                min="0"
+                max="100"
                 value={character.hp} 
-                onChange={(e) => setCharacter({...character, hp: e.target.value})} 
+                onChange={(e) => {
+                  let val = e.target.value;
+                  if (val > 100) val = 100; // cap at 100 (will implment different for each class later)
+                  if (val < 0) val = 0;     // Prevents negative HP
+                  setCharacter({...character, hp: val});
+                }}
                 style={{ width: '60px', background: '#2a2421', color: '#fff', border: '1px solid #555', textAlign: 'center', fontSize: '1.1rem' }} 
               />
               <span style={{ color: '#ff4d4d', fontWeight: 'bold' }}> / 100</span>
             </div>
             <div>
               <span style={{ color: '#4da6ff', fontWeight: 'bold' }}>Spell Slots: </span>
-              <input 
+             <input 
                 type="number" 
+                min="0"
+                max="4"
                 value={character.spellSlots} 
-                onChange={(e) => setCharacter({...character, spellSlots: e.target.value})} 
+                onChange={(e) => {
+                  let val = e.target.value;
+                  if (val > 4) val = 4; //  cap at 4 (will implement different for each class later)
+                  if (val < 0) val = 0; // Prevents negative slots
+                  setCharacter({...character, spellSlots: val});
+                }}
                 style={{ width: '60px', background: '#2a2421', color: '#fff', border: '1px solid #555', textAlign: 'center', fontSize: '1.1rem' }} 
               />
-              <span style={{ color: '#4da6ff', fontWeight: 'bold' }}> / 50</span>
+              <span style={{ color: '#4da6ff', fontWeight: 'bold' }}> / 4</span>
             </div>
           </div>
 
