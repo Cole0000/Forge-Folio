@@ -9,7 +9,7 @@ function App() {
       name: savedName || "Unknown Adventurer",
       level: 1,
       hp: 100,
-      mana: 50,
+      spellslots: 4,
       stats: { strength: 14, intelligence: 18, dexterity: 12 }
     };
   });
@@ -95,7 +95,7 @@ function App() {
             Level {character.level} {recommendation}
           </h4>
           
-          {/* Editable HP and Mana */}
+          {/* Editable HP and Spell Slots */}
           <div style={{ margin: '25px 0', display: 'flex', justifyContent: 'space-around', fontSize: '1.2rem' }}>
             <div>
               <span style={{ color: '#ff4d4d', fontWeight: 'bold' }}>HP: </span>
@@ -108,11 +108,11 @@ function App() {
               <span style={{ color: '#ff4d4d', fontWeight: 'bold' }}> / 100</span>
             </div>
             <div>
-              <span style={{ color: '#4da6ff', fontWeight: 'bold' }}>Mana: </span>
+              <span style={{ color: '#4da6ff', fontWeight: 'bold' }}>Spell Slots: </span>
               <input 
                 type="number" 
-                value={character.mana} 
-                onChange={(e) => setCharacter({...character, mana: e.target.value})} 
+                value={character.spellSlots} 
+                onChange={(e) => setCharacter({...character, spellSlots: e.target.value})} 
                 style={{ width: '60px', background: '#2a2421', color: '#fff', border: '1px solid #555', textAlign: 'center', fontSize: '1.1rem' }} 
               />
               <span style={{ color: '#4da6ff', fontWeight: 'bold' }}> / 50</span>
