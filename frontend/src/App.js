@@ -95,9 +95,28 @@ function App() {
             Level {character.level} {recommendation}
           </h4>
           
-          <div style={{ margin: '25px 0', fontSize: '1.2rem' }}>
-            <div style={{ color: '#ff4d4d', fontWeight: 'bold', marginBottom: '10px' }}>HP: {character.hp} / 100</div>
-            <div style={{ color: '#4da6ff', fontWeight: 'bold' }}>Mana: {character.mana} / 50</div>
+          {/* Editable HP and Mana */}
+          <div style={{ margin: '25px 0', display: 'flex', justifyContent: 'space-around', fontSize: '1.2rem' }}>
+            <div>
+              <span style={{ color: '#ff4d4d', fontWeight: 'bold' }}>HP: </span>
+              <input 
+                type="number" 
+                value={character.hp} 
+                onChange={(e) => setCharacter({...character, hp: e.target.value})} 
+                style={{ width: '60px', background: '#2a2421', color: '#fff', border: '1px solid #555', textAlign: 'center', fontSize: '1.1rem' }} 
+              />
+              <span style={{ color: '#ff4d4d', fontWeight: 'bold' }}> / 100</span>
+            </div>
+            <div>
+              <span style={{ color: '#4da6ff', fontWeight: 'bold' }}>Mana: </span>
+              <input 
+                type="number" 
+                value={character.mana} 
+                onChange={(e) => setCharacter({...character, mana: e.target.value})} 
+                style={{ width: '60px', background: '#2a2421', color: '#fff', border: '1px solid #555', textAlign: 'center', fontSize: '1.1rem' }} 
+              />
+              <span style={{ color: '#4da6ff', fontWeight: 'bold' }}> / 50</span>
+            </div>
           </div>
 
           <div className="stats-container">
