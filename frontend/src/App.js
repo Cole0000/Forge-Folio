@@ -7,6 +7,7 @@ function App() {
     const savedName = localStorage.getItem('playerName');
     return {
       name: savedName || "Unknown Adventurer",
+      avatar: "",
       level: 1,
       hp: 100,
       spellslots: 4,
@@ -23,6 +24,18 @@ function App() {
     // saves it to the browser memory so it doesn't get wiped on refresh
     localStorage.setItem('playerName', inputName);
     setInputName(''); // clears the box after signing
+  };
+
+  // NEW: Image Upload Logic
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setCharacter({ ...character, avatar: reader.result });
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   // the class roller state. user types in what they like, we spit out a classic D&D class.
@@ -90,6 +103,18 @@ function App() {
         {/* left side: my actual character sheet */}
         <div className="left-column">
           <h2>Character Sheet</h2>
+
+          {/* Portrait Display */}
+          <div style={{ width: '150px', height: '150px', margin: '0 auto 15px', border: '2px solid #555', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#1a1614' }}>
+            {character.avatar ? (
+              <img src={character.avatar} alt="Character Portrait" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ) : (
+              <div style={{ padding: '50px 0', color: '#888', fontSize: '0.9rem' }}>No Portrait</div>
+            )}
+          </div>
+          <div style={{ fontSize: '0.8rem', marginBottom: '20px', display: 'flex', justifyContent: 'center' }}>
+            <input type="file" accept="image/*" onChange={handleImageUpload} style={{ color: '#aaa', width: '180px' }} />
+          </div>
           <h3>{character.name}</h3>
           <h4 style={{ color: '#a0a0a0', fontStyle: 'italic' }}>
             Level {character.level} {recommendation}
@@ -159,7 +184,7 @@ function App() {
               Sign
             </button>
           </div>
-
+       
           <hr style={{ borderColor: '#444', borderStyle: 'dashed', margin: '20px 0' }} />
 
           {/* Class Roller */}
