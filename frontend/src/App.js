@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 
 function App() {
@@ -7,11 +7,13 @@ function App() {
     const savedName = localStorage.getItem('playerName');
     return {
       name: savedName || "Unknown Adventurer",
+      race: "Human",
       avatar: "",
       level: 1,
       hp: 100,
       spellslots: 4,
-      stats: { strength: 14, intelligence: 18, dexterity: 12 }
+      stats: { str: 8, dex: 8, con: 8, int: 8, wis: 8, cha: 8 }, 
+      pointsRemaining: 27
     };
   });
 
@@ -38,6 +40,18 @@ function App() {
     }
   };
 
+  // --- REAL D&D DATA FETCHING ---
+  const [apiRaces, setApiRaces] = useState([]);
+  const [apiClassDetails, setApiClassDetails] = useState(null);
+
+   //D&D5e API has a list of races, we fetch it
+  useEffect(() => {
+    fetch('https://www.dnd5eapi.co/api/races')
+      .then(response => response.json()) // Converts the server response to readable data
+      .then(data => setApiRaces(data.results)) // Saves the list of races to our app
+      .catch(error => console.error("Error fetching D&D races:", error));
+  }, []); 
+
   // the class roller state. user types in what they like, we spit out a classic D&D class.
   const [playstyle, setPlaystyle] = useState('');
   const [recommendation, setRecommendation] = useState('Novice Adventurer');
@@ -46,37 +60,56 @@ function App() {
     // checking basic keywords to assign a normal class name.
     const input = playstyle.toLowerCase();
     
+
+    let newRecommendation = 'Novice Adventurer';
+
+
     if (input.includes('logic') || input.includes('chaos') || input.includes('smart') || input.includes('magic') || input.includes('wizard') || input.includes('mage') || input.includes('sorcerer') || input.includes('spell')) {
-      setRecommendation('Wizard');
+      newRecommendation = 'Wizard';
     } else if (input.includes('smash') || input.includes('strong') || input.includes('front') || input.includes('tank') || input.includes('melee') || input.includes('warrior')) {
-      setRecommendation('Barbarian');
+      newRecommendation = 'Barbarian';
     } else if (input.includes('sneak') || input.includes('stealth') || input.includes('rogue') || input.includes('rouge') || input.includes('thief') || input.includes('assassin')) {
-      setRecommendation('Rogue');
+      newRecommendation = 'Rogue';
     } else if (input.includes('shoot') || input.includes('bow') || input.includes('range') || input.includes('archer') || input.includes('ranged')) {
-      setRecommendation('Ranger');
+      newRecommendation = 'Ranger';
     } else if (input.includes('heal') || input.includes('support') || input.includes('cleric') || input.includes('priest') || input.includes('paladin')) {
-      setRecommendation('Cleric');
+      newRecommendation = 'Cleric';
     } else if (input.includes('summon') || input.includes('beast') || input.includes('animal') || input.includes('druid')) {
-      setRecommendation('Druid');
+      newRecommendation = 'Druid';
     } else if (input.includes('fighter') || input.includes('combat') || input.includes('martial') || input.includes('duelist')) {
-      setRecommendation('Fighter');
+      newRecommendation = 'Fighter';
     } else if (input.includes('monk') || input.includes('ki') || input.includes('martial arts') || input.includes('meditation')) {
-      setRecommendation('Monk');
+      newRecommendation = 'Monk';
     } else if (input.includes('warlock') || input.includes('pact') || input.includes('dark magic') || input.includes('cursed')) {
-      setRecommendation('Warlock');
+      newRecommendation = 'Warlock';
     } else if (input.includes('paladin') || input.includes('holy') || input.includes('divine') || input.includes('oath')) {
-      setRecommendation('Paladin');
+      newRecommendation = 'Paladin';
     } else if (input.includes('bard') || input.includes('music') || input.includes('song') || input.includes('performance')) {
-      setRecommendation('Bard');
+      newRecommendation = 'Bard'  ;
     } else if (input.includes('sorcerer') || input.includes('innate magic') || input.includes('bloodline') || input.includes('wild magic')) {
-      setRecommendation('Sorcerer');
+      newRecommendation = 'Sorcerer';
     } else if (input.includes('artificer') || input.includes('invention') || input.includes('gadgetry') || input.includes('mechanical')) {
-      setRecommendation('Artificer');
+      newRecommendation = 'Artificer';
     } else if (input.includes('echo') || input.includes('time') || input.includes('duplicate') || input.includes('shadow')) {
-      setRecommendation('Echo Knight');
-    } else { 
+      newRecommendation = 'Echo Knight';
+    }  
       // default recommendation if no keywords match
-      setRecommendation('Novice Adventurer');
+      setRecommendation(newRecommendation);
+
+      // 2. The API Safety Net
+    // This is the list of classes the official D&D API actually has data for
+    const validAPIClasses = ['barbarian', 'bard', 'cleric', 'druid', 'fighter', 'monk', 'paladin', 'ranger', 'rogue', 'sorcerer', 'warlock', 'wizard'];
+    const searchParam = newRecommendation.toLowerCase();
+
+    if (validAPIClasses.includes(searchParam)) {
+      // If it's a core class, go grab the data!
+      fetch(`https://www.dnd5eapi.co/api/classes/${searchParam}`)
+        .then(response => response.json())
+        .then(data => setApiClassDetails(data))
+        .catch(error => console.error("Error fetching class details:", error));
+    } else {
+     
+      setApiClassDetails(null);
     } 
   };
 
@@ -99,7 +132,7 @@ function App() {
       <h1>Forge & Folio</h1>
       
       <div className="dashboard"> 
-        
+     
         {/* left side: my actual character sheet */}
         <div className="left-column">
           <h2>Character Sheet</h2>
@@ -117,9 +150,18 @@ function App() {
           </div>
           <h3>{character.name}</h3>
           <h4 style={{ color: '#a0a0a0', fontStyle: 'italic' }}>
-            Level {character.level} {recommendation}
+            Level {character.level}, {character.race} {recommendation}
           </h4>
           
+
+          {/* Displays the real Hit Die */}
+          {apiClassDetails && (
+            <p style={{ color: '#ff4d4d', fontSize: '0.9rem', marginTop: '-10px', fontStyle: 'italic' }}>
+              Official Hit Die: d{apiClassDetails.hit_die}
+            </p>
+          )}
+
+
           {/* Editable HP and Spell Slots */}
           <div style={{ margin: '25px 0', display: 'flex', flexDirection: 'column',gap: '15px', fontSize: '1.2rem' }}>
             <div>
@@ -185,6 +227,28 @@ function App() {
             </button>
           </div>
        
+          <hr style={{ borderColor: '#444', borderStyle: 'dashed', margin: '20px 0' }} />
+
+{/* Race Selector Using Real API Data */}
+          <p>Choose your race:</p>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+            <select 
+              value={character.race} 
+              onChange={(e) => setCharacter({...character, race: e.target.value})}
+              className="input-field"
+              style={{ width: '50%', cursor: 'pointer', padding: '10px', background: '#1a1614', color: '#fff' }}
+            >
+              {/* If the API is still loading, show a loading message. Otherwise, map out the races! */}
+              {apiRaces.length > 0 ? (
+                apiRaces.map((race) => (
+                  <option key={race.index} value={race.name}>{race.name}</option>
+                ))
+              ) : (
+                <option>Consulting the archives...</option>
+              )}
+            </select>
+          </div>
+
           <hr style={{ borderColor: '#444', borderStyle: 'dashed', margin: '20px 0' }} />
 
           {/* Class Roller */}
