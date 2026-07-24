@@ -52,6 +52,60 @@ function App() {
       .catch(error => console.error("Error fetching D&D races:", error));
   }, []); 
 
+  // --- STAT GENERATOR LOGIC ---
+  const [statMode, setStatMode] = useState('pointBuy'); 
+
+  const updateStat = (statName, amount) => {
+    const currentVal = character.stats[statName];
+    if (amount > 0 && character.pointsRemaining > 0 && currentVal < 15) {
+      setCharacter({
+        ...character,
+        stats: { ...character.stats, [statName]: currentVal + 1 },
+        pointsRemaining: character.pointsRemaining - 1
+      });
+    } else if (amount < 0 && currentVal > 8) {
+      setCharacter({
+        ...character,
+        stats: { ...character.stats, [statName]: currentVal - 1 },
+        pointsRemaining: character.pointsRemaining + 1
+      });
+    }
+  };
+
+  const rollStats = () => {
+    const roll4d6DropLowest = () => {
+      let rolls = [
+        Math.floor(Math.random() * 6) + 1,
+        Math.floor(Math.random() * 6) + 1,
+        Math.floor(Math.random() * 6) + 1,
+        Math.floor(Math.random() * 6) + 1
+      ];
+      rolls.sort((a, b) => a - b);
+      return rolls[1] + rolls[2] + rolls[3];
+    };
+
+    setCharacter({
+      ...character,
+      stats: {
+        str: roll4d6DropLowest(),
+        dex: roll4d6DropLowest(),
+        con: roll4d6DropLowest(),
+        int: roll4d6DropLowest(),
+        wis: roll4d6DropLowest(),
+        cha: roll4d6DropLowest()
+      },
+      pointsRemaining: 0 
+    });
+  };
+
+  const resetStats = () => {
+    setCharacter({
+      ...character,
+      stats: { str: 8, dex: 8, con: 8, int: 8, wis: 8, cha: 8 },
+      pointsRemaining: 27
+    });
+  };
+
   // the class roller state. user types in what they like, we spit out a classic D&D class.
   const [playstyle, setPlaystyle] = useState('');
   const [recommendation, setRecommendation] = useState('Novice Adventurer');
@@ -96,7 +150,6 @@ function App() {
       // default recommendation if no keywords match
       setRecommendation(newRecommendation);
 
-      // 2. The API Safety Net
     // This is the list of classes the official D&D API actually has data for
     const validAPIClasses = ['barbarian', 'bard', 'cleric', 'druid', 'fighter', 'monk', 'paladin', 'ranger', 'rogue', 'sorcerer', 'warlock', 'wizard'];
     const searchParam = newRecommendation.toLowerCase();
@@ -201,11 +254,15 @@ function App() {
           </div>
 
           <div className="stats-container">
-            <div className="stat-block"><span>Strength:</span> <span>{character.stats.strength}</span></div>
-            <div className="stat-block"><span>Intelligence:</span> <span>{character.stats.intelligence}</span></div>
-            <div className="stat-block"><span>Dexterity:</span> <span>{character.stats.dexterity}</span></div>
+            {Object.keys(character.stats).map((stat) => (
+              <div key={stat} className="stat-block" style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 15px', borderBottom: '1px solid #333' }}>
+                <span style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{stat}:</span> 
+                <span>{character.stats[stat]}</span>
+              </div>
+            ))}
           </div>
         </div>
+         
 
         {/* right side: the tavern. getting user input and rolling classes */}
         <div className="right-column">
@@ -267,6 +324,44 @@ function App() {
           
           <hr style={{ borderColor: '#444', borderStyle: 'dashed', margin: '20px 0' }} />
 
+
+          {/* Stat Generation */}
+          <div style={{ marginBottom: '20px' }}>
+            <p style={{ marginTop: 0 }}><strong>Determine Your Attributes</strong></p>
+            
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '15px' }}>
+              <button onClick={() => { setStatMode('pointBuy'); resetStats(); }} style={{ background: statMode === 'pointBuy' ? '#8b0000' : '#333', color: '#fff', border: 'none', padding: '5px 15px', cursor: 'pointer' }}>Point Buy</button>
+              <button onClick={() => setStatMode('roll')} style={{ background: statMode === 'roll' ? '#8b0000' : '#333', color: '#fff', border: 'none', padding: '5px 15px', cursor: 'pointer' }}>Roll 4d6</button>
+            </div>
+
+            {statMode === 'pointBuy' ? (
+              <div>
+                <p style={{ color: '#4da6ff', margin: '5px 0' }}>Points Remaining: {character.pointsRemaining}</p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                  {Object.keys(character.stats).map((stat) => (
+                    <div key={stat} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#000', padding: '5px', border: '1px solid #555' }}>
+                      <span style={{ textTransform: 'uppercase' }}>{stat}</span>
+                      <div>
+                        <button onClick={() => updateStat(stat, -1)} style={{ background: '#444', color: '#fff', border: 'none', cursor: 'pointer', padding: '2px 8px' }}>-</button>
+                        <span style={{ margin: '0 10px' }}>{character.stats[stat]}</span>
+                        <button onClick={() => updateStat(stat, 1)} style={{ background: '#444', color: '#fff', border: 'none', cursor: 'pointer', padding: '2px 8px' }}>+</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div>
+                <p style={{ fontSize: '0.9rem', color: '#aaa' }}>Rolls 4d6 and drops the lowest die for each attribute.</p>
+                <button className="btn-action" onClick={rollStats}>Cast The Dice</button>
+              </div>
+            )}
+          </div>
+          
+          <hr style={{ borderColor: '#444', borderStyle: 'dashed', margin: '20px 0' }} />
+
+
+
           {/* The Quest Log (To-Do List) */}
           <h2>Active Quests</h2>
           <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginBottom: '20px' }}>
@@ -305,4 +400,4 @@ function App() {
   );
 }
 
-export default App;
+export default App; 
