@@ -180,10 +180,107 @@ function App() {
     setQuests(quests.filter((_, index) => index !== indexToRemove));
   };
 
+
+  const [showSplash, setShowSplash] = useState(true);
+  const [activeTab, setActiveTab] = useState('dashboard'); 
+  
+  // Starting gear
+  const [inventory, setInventory] = useState([
+    ' Longsword',
+    ' Iron Shield',
+    ' Explorer\'s Pack',
+    ' Rations (5)'
+  ]);
+  const [newItem, setNewItem] = useState('');
+
+  // Inventory logic
+  const addItem = () => {
+    if (newItem.trim() !== '') {
+      setInventory([...inventory, newItem.trim()]);
+      setNewItem('');
+    }
+  };
+
+  const removeItem = (indexToRemove) => {
+    setInventory(inventory.filter((_, index) => index !== indexToRemove));
+  };
+
   return (
     <div className="App">
+
+      {showSplash ? (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+          backgroundColor: '#1a1614', display: 'flex', flexDirection: 'column',
+          justifyContent: 'center', alignItems: 'center', zIndex: 9999,
+          color: '#fff', textAlign: 'center', padding: '20px'
+        }}>
+          
+          {/* Fantasy Image */}
+
+          <div style={{
+            width: '600px', 
+            height: 'auto', 
+            border: '3px double #8b0000',
+            borderRadius: '12px', 
+            display: 'flex', 
+            justifyContent: 'center',
+            alignItems: 'center', 
+            marginBottom: '30px', 
+            backgroundColor: '#0f0c0b',
+            boxShadow: '0 0 20px rgba(139, 0, 0, 0.5)',
+            overflow: 'hidden' 
+          }}>
+            <img 
+              src="/forge.png" 
+              alt="Forge & Folio Realm of Creation" 
+              style={{ width: '100%', height: 'auto', display: 'block' }} 
+            />
+          </div>
+
+          <h1 style={{ fontSize: '3.5rem', margin: '0 0 10px 0', color: '#ffcc00', textShadow: '2px 2px 4px #000' }}>
+            Welcome, Adventurer
+          </h1>
+          <p style={{ fontSize: '1.2rem', color: '#aaa', fontStyle: 'italic', marginBottom: '40px', maxWidth: '500px' }}>
+            The ledger awaits. Step inside the guild hall to forge your destiny.
+          </p>
+          <button 
+            className="btn-action" 
+            onClick={() => setShowSplash(false)}
+            style={{ padding: '15px 40px', fontSize: '1.3rem', cursor: 'pointer' }}
+          >
+            Enter the Tavern
+          </button>
+
+        </div>
+      ) : null}
+
       <h1>Forge & Folio</h1>
+      {/* Navigation Tabs */}
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginBottom: '25px' }}>
+        <button 
+          onClick={() => setActiveTab('dashboard')}
+          style={{
+            background: activeTab === 'dashboard' ? '#8b0000' : '#2a2421',
+            color: '#fff', border: '1px solid #555', padding: '10px 25px',
+            fontSize: '1.1rem', cursor: 'pointer', borderRadius: '4px'
+          }}
+        >
+           Character Dashboard
+        </button>
+        <button 
+          onClick={() => setActiveTab('inventory')}
+          style={{
+            background: activeTab === 'inventory' ? '#8b0000' : '#2a2421',
+            color: '#fff', border: '1px solid #555', padding: '10px 25px',
+            fontSize: '1.1rem', cursor: 'pointer', borderRadius: '4px'
+          }}
+        >
+           Equipment & Inventory
+        </button>
+      </div>
       
+      {activeTab === 'dashboard' ? (
       <div className="dashboard"> 
      
         {/* left side: my actual character sheet */}
@@ -396,6 +493,58 @@ function App() {
         </div>
 
       </div>
+
+    ) : (
+        /* --- INVENTORY TAB INTERFACE --- */
+        <div style={{ 
+          background: '#1a1614', border: '2px solid #333', borderRadius: '8px', 
+          padding: '30px', maxWidth: '800px', margin: '0 auto', textAlign: 'center' 
+        }}>
+          <h2>Vault & Equipment Log</h2>
+          <p style={{ color: '#aaa', fontStyle: 'italic' }}>Manage the gear, relics, and treasures carrying you through the quest.</p>
+          
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', margin: '30px 0' }}>
+            <input 
+              className="input-field"
+              style={{ marginBottom: '0', width: '60%' }}
+              type="text" 
+              value={newItem} 
+              onChange={(e) => setNewItem(e.target.value)} 
+              placeholder="Forge new equipment ..."
+            />
+            <button className="btn-action" onClick={addItem}>
+              Stash Item
+            </button>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginTop: '20px' }}>
+            {inventory.length > 0 ? (
+              inventory.map((item, index) => (
+                <div 
+                  key={index} 
+                  style={{ 
+                    background: '#0f0c0b', border: '1px solid #555', padding: '15px', 
+                    borderRadius: '4px', display: 'flex', justifyContent: 'space-between', 
+                    alignItems: 'center', fontSize: '1.1rem' 
+                  }}
+                >
+                  <span>{item}</span>
+                  <button 
+                    onClick={() => removeItem(index)}
+                    style={{ background: 'transparent', color: '#ff4d4d', border: 'none', cursor: 'pointer', fontSize: '1.2rem' }}
+                    title="Drop Item"
+                  >
+                    ❌
+                  </button>
+                </div>
+              ))
+            ) : (
+              <p style={{ gridColumn: '1 / -1', color: '#888', padding: '20px' }}>Your packs are completely empty, traveler.</p>
+            )}
+          </div>
+        </div>
+      
+      )}
     </div>
   );
 }
